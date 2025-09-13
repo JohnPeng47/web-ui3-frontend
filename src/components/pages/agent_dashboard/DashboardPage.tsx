@@ -8,8 +8,10 @@ import SpiderStatsCard from "./SpiderStatsCard";
 import VulnerabilityList from "./VulnerabilityList";
 import type { DashboardData, LogEntry } from "./types";
 import { getDemoData, getDashboardData } from "../../../lib/api";
+import { useParams } from "react-router-dom";
 
 export default function DashboardPage() {
+  const { engagementId } = useParams<{ engagementId: string }>();
   const [data, setData] = useState<DashboardData>(() => getDemoData());
 
   // Simulated client-side updates to mirror the original behavior (remove once polling wired)
