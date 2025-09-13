@@ -1,5 +1,6 @@
 import type { DashboardData } from "../components/pages/agent_dashboard/types";
-import { API_BASE_URL } from "../config";
+import { getApiBaseUrl } from "../config";
+import type { HealthResponse } from "../api/system/types";
 
 export function getDemoData(): DashboardData {
   return {
@@ -72,7 +73,7 @@ export async function getDashboardData(signal: AbortSignal): Promise<DashboardDa
   if (lastEtag) headers["If-None-Match"] = lastEtag;
   if (lastModified) headers["If-Modified-Since"] = lastModified;
 
-  const res = await fetch(`${API_BASE_URL}/api/dashboard`, { headers, signal });
+  const res = await fetch(`${getApiBaseUrl()}/api/dashboard`, { headers, signal });
 
   if (res.status === 304 && cached) {
     return cached;
@@ -89,4 +90,15 @@ export async function getDashboardData(signal: AbortSignal): Promise<DashboardDa
   lastModified = modified;
   cached = json;
   return json;
+}
+
+export async function initApi(signal?: AbortSignal): Promise<void> {
+  const res = await fetch(`${getApiBaseUrl()}/health`, { signal, credentials: "include" });
+  if (!res.ok) {
+    throw new Error(`Health check failed (${res.status})`);
+  }
+  const json = (await res.json()) as HealthResponse;
+  if (json?.status !== "healthy") {
+    throw new Error("Health check returned unhealthy status");
+  }
 }

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../config";
+import { getApiBaseUrl } from "../config";
 import type {
   EngagementCreate,
   EngagementOut,
@@ -27,8 +27,8 @@ export class HTTPProvider {
   private readonly baseUrl: string;
 
   constructor() {
-    // Build base URL from environment (via config helper)
-    this.baseUrl = API_BASE_URL.replace(/\/$/, "");
+    this.baseUrl = getApiBaseUrl().replace(/\/$/, "");
+    console.log("baseUrl:", this.baseUrl);
     ensureAuthCookiesFromLocalStorage();
   }
 

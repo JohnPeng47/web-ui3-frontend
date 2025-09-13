@@ -1,8 +1,27 @@
-// Build-time env (prefixed with REACT_APP_) and sensible browser defaults
+// Runtime config loaded from /config.json
 
-const envHost = process.env.REACT_APP_API_HOST;
-const envPort = process.env.REACT_APP_API_PORT;
-const envProtocol = process.env.REACT_APP_API_PROTOCOL;
+export type RuntimeConfig = {
+  apiProtocol?: string;
+  apiHost?: string;
+  apiPort?: string | number;
+};
+
+let runtimeConfig: RuntimeConfig | undefined;
+
+export async function loadRuntimeConfig(): Promise<void> {
+  if (runtimeConfig) return;
+  try {
+    const res = await fetch('/config.json', { cache: 'no-store' as const });
+    if (!res.ok) throw new Error(`Failed to load config.json (${res.status})`);
+    const json = (await res.json()) as RuntimeConfig;
+    runtimeConfig = json;
+  } catch (error) {
+    // As a fallback, use window location to build API base URL
+    runtimeConfig = {};
+    // Re-throw so callers know config failed to load
+    throw error;
+  }
+}
 
 function getDefaultProtocol() {
   if (typeof window !== 'undefined' && window.location?.protocol) {
@@ -20,14 +39,15 @@ function getDefaultHost() {
 
 function getDefaultPort() {
   if (typeof window !== 'undefined') {
-    return window.location?.port || '';
+    return 8000;
   }
   return '';
 }
 
-const protocol = (envProtocol || getDefaultProtocol()).replace(':', '');
-const host = envHost || getDefaultHost();
-const port = envPort ?? getDefaultPort();
-
-export const API_BASE_URL = `${protocol}://${host}${port ? `:${port}` : ''}`;
+export function getApiBaseUrl(): string {
+  const protocol = (runtimeConfig?.apiProtocol || getDefaultProtocol()).replace(':', '');
+  const host = runtimeConfig?.apiHost || getDefaultHost();
+  const port = runtimeConfig?.apiPort !== undefined ? String(runtimeConfig.apiPort) : getDefaultPort();
+  return `${protocol}://${host}${port ? `:${port}` : ''}`;
+}
 
