@@ -5,6 +5,15 @@ import type {
   EngagementPageDataOut,
   PageDataMergeRequest
 } from "./engagement/types";
+import type {
+  AgentOut,
+  DiscoveryAgentCreate,
+  UploadAgentSteps,
+  UploadPageData,
+  PageDataResponse,
+  PageSkipDecision,
+  ExploitAgentStep
+} from "./agent/types";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -83,6 +92,67 @@ export class HTTPProvider {
       `/engagement/${encodeURIComponent(engagementId)}/page-data`,
       { method: "POST", body: payload, signal }
     );
+  }
+
+  // Agent API
+  async registerDiscoveryAgent(
+    engagementId: string,
+    payload: DiscoveryAgentCreate,
+    signal?: AbortSignal
+  ): Promise<AgentOut> {
+    return this.request<AgentOut>(
+      `/engagement/${encodeURIComponent(engagementId)}/agents/discovery/register`,
+      { method: "POST", body: payload, signal }
+    );
+  }
+
+  async listEngagementAgents(engagementId: string, signal?: AbortSignal): Promise<AgentOut[]> {
+    return this.request<AgentOut[]>(`/engagement/${encodeURIComponent(engagementId)}/agents`, {
+      method: "GET",
+      signal
+    });
+  }
+
+  async uploadAgentSteps(
+    agentId: string,
+    payload: UploadAgentSteps,
+    signal?: AbortSignal
+  ): Promise<unknown> {
+    // Server may return null/empty; we keep unknown to avoid forcing a shape
+    return this.request<unknown>(`/agents/${encodeURIComponent(agentId)}/steps`, {
+      method: "POST",
+      body: payload,
+      signal
+    });
+  }
+
+  async uploadPageData(
+    agentId: string,
+    payload: UploadPageData,
+    signal?: AbortSignal
+  ): Promise<PageSkipDecision> {
+    return this.request<PageSkipDecision>(`/agents/${encodeURIComponent(agentId)}/page-data`, {
+      method: "POST",
+      body: payload,
+      signal
+    });
+  }
+
+  async getAgentPageData(
+    engagementId: string,
+    signal?: AbortSignal
+  ): Promise<PageDataResponse> {
+    return this.request<PageDataResponse>(`/agents/${encodeURIComponent(engagementId)}/page-data`, {
+      method: "GET",
+      signal
+    });
+  }
+
+  async getAgentSteps(agentId: string, signal?: AbortSignal): Promise<ExploitAgentStep[]> {
+    return this.request<ExploitAgentStep[]>(`/agents/${encodeURIComponent(agentId)}/steps`, {
+      method: "GET",
+      signal
+    });
   }
 }
 
