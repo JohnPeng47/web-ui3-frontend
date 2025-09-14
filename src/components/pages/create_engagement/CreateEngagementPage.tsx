@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Button, Card, CardContent, CardHeader, Container, Stack, TextField, Typography } from "@mui/material";
 import type { EngagementCreate } from "../../../api/engagement/types";
+import type { DiscoveryAgentCreate } from "../../../api/agent/types";
 import { http } from "../../../api/http";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +17,12 @@ export default function CreateEngagementPage() {
     setError(null);
     try {
       const created = await http.createEngagement(form);
+      // Immediately register a discovery agent for this engagement
+      const createAgentPayload: DiscoveryAgentCreate = {
+        max_steps: 100,
+        model_name: "gpt-4o-mini"
+      };
+      await http.registerDiscoveryAgent(created.id, createAgentPayload);
       // Navigate to dashboard with engagementId
       navigate(`/dashboard/${created.id}`);
     } catch (err) {
