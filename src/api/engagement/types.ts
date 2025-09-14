@@ -1,5 +1,7 @@
 // Engagement domain API types used by the frontend
 
+import type { PageDTO } from "../agent/types";
+
 export interface EngagementCreate {
   name: string;
   base_url: string;
@@ -12,16 +14,16 @@ export interface EngagementOut extends EngagementCreate {
   created_at: string; // ISO datetime
   findings?: Array<Record<string, unknown>> | null;
   domain_ownership_verified: boolean;
-  page_data?: Array<Record<string, unknown>> | null;
+  page_data?: PageDTO[] | null;
 }
 
 export interface PageDataMergeRequest {
   agent_id: string;
-  delta: Array<Record<string, unknown>>;
+  delta: PageDTO[];
 }
 
 export interface EngagementPageDataOut {
-  page_data: Array<Record<string, unknown>>;
+  page_data: PageDTO[];
 }
 
 

@@ -8,10 +8,7 @@ import type {
 import type {
   AgentOut,
   DiscoveryAgentCreate,
-  UploadAgentSteps,
-  UploadPageData,
   PageDataResponse,
-  PageSkipDecision,
   ExploitAgentStep
 } from "./agent/types";
 
@@ -109,31 +106,6 @@ export class HTTPProvider {
   async listEngagementAgents(engagementId: string, signal?: AbortSignal): Promise<AgentOut[]> {
     return this.request<AgentOut[]>(`/engagement/${encodeURIComponent(engagementId)}/agents`, {
       method: "GET",
-      signal
-    });
-  }
-
-  async uploadAgentSteps(
-    agentId: string,
-    payload: UploadAgentSteps,
-    signal?: AbortSignal
-  ): Promise<unknown> {
-    // Server may return null/empty; we keep unknown to avoid forcing a shape
-    return this.request<unknown>(`/agents/${encodeURIComponent(agentId)}/steps`, {
-      method: "POST",
-      body: payload,
-      signal
-    });
-  }
-
-  async uploadPageData(
-    agentId: string,
-    payload: UploadPageData,
-    signal?: AbortSignal
-  ): Promise<PageSkipDecision> {
-    return this.request<PageSkipDecision>(`/agents/${encodeURIComponent(agentId)}/page-data`, {
-      method: "POST",
-      body: payload,
       signal
     });
   }

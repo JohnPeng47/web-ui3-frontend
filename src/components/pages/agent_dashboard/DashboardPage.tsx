@@ -112,15 +112,6 @@ export default function DashboardPage() {
         <Grid size={{ xs: 12, lg: 8 }}>
           <VulnerabilityList items={data.vulnerabilities} />
         </Grid>
-
-        <Grid size={{ xs: 12 }}>
-          <Card variant="outlined">
-            <CardHeader title={<Typography variant="h6">Activity Log</Typography>} subheader="Real-time" />
-            <CardContent>
-              <ActivityLog entries={data.logEntries} />
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
     </Container>
   );

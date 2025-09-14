@@ -43,29 +43,48 @@ export interface ExploitAgentStep extends AgentStep {
   execution_output: string;
 }
 
-export interface UploadAgentSteps extends AgentMessage {
-  steps: ExploitAgentStep[];
+// Page data DTOs reflecting PageObservations.to_json output
+export interface HTTPRequestDataDTO {
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  post_data?: unknown | null;
+  redirected_from_url?: string | null;
+  redirected_to_url?: string | null;
+  is_iframe: boolean;
 }
 
-export interface UploadPageData extends AgentMessage {
-  /** Current total steps completed across the agent lifecycle */
-  steps: number;
-  /** Max steps allowed across the agent lifecycle */
-  max_steps: number;
-  /** Steps taken within the current page */
-  page_steps: number;
-  /** Max steps allowed within a single page */
-  max_page_steps: number;
-  /** Raw page observation objects, kept flexible */
-  page_data: Array<Record<string, unknown>>;
+export interface HTTPRequestDTO {
+  // Matches HTTPRequest.model_dump() → { data: { ... } }
+  data: HTTPRequestDataDTO;
+}
+
+export interface HTTPResponseDataDTO {
+  url: string;
+  status: number;
+  headers: Record<string, string>;
+  content_type: string;
+  content_length: number;
+  is_iframe: boolean;
+  body?: string;
+  body_error?: string;
+}
+
+export interface HTTPResponseDTO {
+  // Matches HTTPResponse.to_json() → { data: { ... } }
+  data: HTTPResponseDataDTO;
+}
+
+export interface HTTPMessageDTO {
+  request: HTTPRequestDTO;
+  response?: HTTPResponseDTO;
+}
+
+export interface PageDTO {
+  url: string;
+  http_msgs: HTTPMessageDTO[];
 }
 
 export interface PageDataResponse {
-  page_data: Array<Record<string, unknown>>;
+  page_data: PageDTO[];
 }
-
-export interface PageSkipDecision {
-  page_skip: boolean;
-}
-
-
