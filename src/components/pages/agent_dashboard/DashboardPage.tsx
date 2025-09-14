@@ -9,10 +9,12 @@ import VulnerabilityList from "./VulnerabilityList";
 import type { DashboardData, LogEntry } from "./types";
 import { getDemoData, getDashboardData } from "../../../lib/api";
 import { useParams } from "react-router-dom";
+import { useAgentPageDataQuery } from "../../../features/agent/queries/useAgentPageDataQuery";
 
 export default function DashboardPage() {
   const { engagementId } = useParams<{ engagementId: string }>();
   const [data, setData] = useState<DashboardData>(() => getDemoData());
+  const { data: agentData } = useAgentPageDataQuery(engagementId, { intervalMs: 5000 });
 
   // Simulated client-side updates to mirror the original behavior (remove once polling wired)
   useEffect(() => {
@@ -58,10 +60,8 @@ export default function DashboardPage() {
         return {
           ...prev,
           logEntries: [newEntry, ...prev.logEntries].slice(0, 30),
-          progressPercent: Math.min(prev.progressPercent + Math.random() * 2, 100),
           spiderStats: {
             pages: prev.spiderStats.pages + Math.floor(Math.random() * 3),
-            links: prev.spiderStats.links + Math.floor(Math.random() * 3),
             requests: prev.spiderStats.requests + Math.floor(Math.random() * 3)
           }
         };
@@ -74,37 +74,17 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const siteTreeLines = useMemo(
-    () => [
-      "/",
-      "├─ /login",
-      "│  ├─ POST /api/auth",
-      "│  └─ GET /api/session",
-      "├─ /dashboard",
-      "│  ├─ GET /api/user",
-      "│  └─ GET /api/stats",
-      "├─ /products",
-      "│  ├─ GET /api/products",
-      "│  └─ GET /api/categories",
-      "├─ /admin",
-      "│  ├─ GET /api/admin/users",
-      "│  └─ POST /api/admin/config",
-      "└─ /api/v2",
-      "   ├─ GET /api/v2/search",
-      "   └─ POST /api/v2/upload"
-    ],
-    []
-  );
+  const siteTreeLines = agentData?.siteTreeLines ?? ["/"];
+  const stats = agentData?.spiderStats ?? data.spiderStats;
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <HeaderBar title="Pentest Agent Dashboard" target={data.targetUrl} scanning={data.scanning} />
+      <HeaderBar title="Pentest Agent Dashboard" />
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: 4 }}>
           <SpiderStatsCard
-            stats={data.spiderStats}
-            progressPercent={data.progressPercent}
+            stats={stats}
             siteTreeLines={siteTreeLines}
           />
         </Grid>

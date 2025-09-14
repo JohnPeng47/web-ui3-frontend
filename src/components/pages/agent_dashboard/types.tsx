@@ -23,14 +23,11 @@ export interface LogEntry {
 
 export interface SpiderStats {
   pages: number;
-  links: number;
+  // links: number;
   requests: number;
 }
 
 export interface DashboardData {
-  targetUrl: string;
-  scanning: boolean;
-  progressPercent: number;
   spiderStats: SpiderStats;
   vulnerabilities: Vulnerability[];
   logEntries: LogEntry[];

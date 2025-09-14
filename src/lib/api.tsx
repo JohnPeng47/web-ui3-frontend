@@ -4,10 +4,7 @@ import type { HealthResponse } from "../api/system/types";
 
 export function getDemoData(): DashboardData {
   return {
-    targetUrl: "https://example-target.com",
-    scanning: true,
-    progressPercent: 65,
-    spiderStats: { pages: 47, links: 312, requests: 856 },
+    spiderStats: { pages: 47, requests: 856 },
     vulnerabilities: [
       {
         id: "1",
