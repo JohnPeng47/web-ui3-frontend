@@ -11,6 +11,8 @@ export interface DerivedAgentPageData {
   raw?: PageDataResponse;
 }
 
+// NOTE: can not directly pass these in as props since they will refer to the same
+// static var ref
 const lastObsByEngagement = new Map<string, PageObservations>();
 const timelineByEngagement = new Map<string, PageObservations[]>();
 

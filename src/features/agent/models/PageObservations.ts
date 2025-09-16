@@ -61,7 +61,7 @@ export class PageObservations {
     const safePathFromUrl = (url: string): string => {
       try {
         const u = new URL(url);
-        return "/" + u.pathname || "/" + u.hash || "/";
+        return u.pathname || "/";
       } catch {
         return url || "/";
       }

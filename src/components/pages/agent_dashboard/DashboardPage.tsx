@@ -1,81 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Box, Card, CardContent, CardHeader, Container, Typography, Grid } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, Container, Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HeaderBar from "../../common/HeaderBar";
-import ActivityLog from "../../common/ActivityLog";
 import SpiderStatsCard from "./SpiderStatsCard";
-import VulnerabilityList from "./VulnerabilityList";
-import type { DashboardData, LogEntry } from "./types";
-import { getDemoData, getDashboardData } from "../../../lib/api";
 import { useParams } from "react-router-dom";
 import { useAgentPageDataQuery } from "../../../features/agent/queries/useAgentPageDataQuery";
+import { useExploitAgentSteps } from "../../../features/agent/queries/useExploitAgentQueries";
 
 export default function DashboardPage() {
   const { engagementId } = useParams<{ engagementId: string }>();
-  const [data, setData] = useState<DashboardData>(() => getDemoData());
   const { data: agentData } = useAgentPageDataQuery(engagementId, { intervalMs: 5000 });
-
-  // Simulated client-side updates to mirror the original behavior (remove once polling wired)
-  useEffect(() => {
-    // Try to fetch initial data from API; fall back to demo data if it fails
-    const controller = new AbortController();
-    getDashboardData(controller.signal)
-      .then((d) => setData(d))
-      .catch(() => {
-        // keep demo data if API not available
-      });
-
-    const logTimer = setInterval(() => {
-      setData((prev) => {
-        const agents: Array<"spider" | "scanner"> = ["spider", "scanner"];
-        const agent = agents[Math.floor(Math.random() * agents.length)];
-        const messages = {
-          spider: [
-            "New endpoint discovered: /api/v3/users",
-            "Crawling depth increased to level 4",
-            "Form submission point identified",
-            "JavaScript file analysis in progress",
-            "Hidden parameter found in response"
-          ],
-          scanner: [
-            "Testing for CSRF vulnerabilities",
-            "Analyzing session management",
-            "Fuzzing input parameters",
-            "Checking for XML injection",
-            "Validating SSL/TLS configuration"
-          ]
-        } as const;
-
-        const time = new Date().toLocaleTimeString("en-US", { hour12: false });
-        const message = messages[agent][Math.floor(Math.random() * messages[agent].length)];
-
-        const newEntry: LogEntry = {
-          id: Date.now().toString(),
-          time,
-          agent,
-          message
-        };
-
-        return {
-          ...prev,
-          logEntries: [newEntry, ...prev.logEntries].slice(0, 30),
-          spiderStats: {
-            pages: prev.spiderStats.pages + Math.floor(Math.random() * 3),
-            requests: prev.spiderStats.requests + Math.floor(Math.random() * 3)
-          }
-        };
-      });
-    }, 3000);
-
-    return () => {
-      controller.abort();
-      clearInterval(logTimer);
-    };
-  }, []);
+  const { exploitAgents, agentStatus, exploitAgentData, stepsStatus, stepsError } = useExploitAgentSteps(engagementId, {
+    findIntervalMs: 2000,
+    afterFoundIntervalMs: 30000,
+    keepWatchingAgents: true,
+    stepsIntervalMs: 2000
+  });
 
   const siteTreeLines = agentData?.siteTreeLines ?? ["/"];
-  const stats = agentData?.spiderStats ?? data.spiderStats;
+  const stats = agentData?.spiderStats ?? { pages: 0, requests: 0 };
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
@@ -90,7 +34,80 @@ export default function DashboardPage() {
         </Grid>
 
         <Grid size={{ xs: 12, lg: 8 }}>
-          <VulnerabilityList items={data.vulnerabilities} />
+          <Card sx={{ mt: 2 }}>
+            <CardHeader
+              title="Exploit Agents"
+              subheader={`Agents: ${exploitAgents?.length ?? 0} • Agent status: ${agentStatus} • Steps status: ${stepsStatus}`}
+            />
+            <CardContent>
+              {stepsError ? (
+                <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+                  {(stepsError as Error).message}
+                </Typography>
+              ) : null}
+              {!exploitAgentData?.length ? (
+                <Typography variant="body2" color="text.secondary">Waiting for exploit agent…</Typography>
+              ) : null}
+            </CardContent>
+          </Card>
+
+          {exploitAgentData?.map((agent) => (
+            <Card key={agent.agentId} sx={{ mt: 2 }}>
+              <CardHeader
+                title={agent.agentName}
+                subheader={`Agent ID: ${agent.agentId} • ${agent.agentSteps.length} steps`}
+              />
+              <CardContent>
+                {agent.agentSteps.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary">No steps yet.</Typography>
+                ) : (
+                  <Box sx={{ display: "grid", gap: 1 }}>
+                    {agent.agentSteps.map((s) => (
+                      <Accordion key={s.step_num} disableGutters>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography variant="subtitle2">
+                            {`Step ${s.step_num}: ${s.reflection}`}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", mb: 1 }}>
+                            {s.reflection}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: "monospace",
+                              display: "block",
+                              whiteSpace: "pre-wrap",
+                              bgcolor: "action.hover",
+                              p: 1,
+                              borderRadius: 1,
+                              mb: 1
+                            }}
+                          >
+                            {s.script}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: "monospace",
+                              display: "block",
+                              whiteSpace: "pre-wrap",
+                              bgcolor: "action.hover",
+                              p: 1,
+                              borderRadius: 1
+                            }}
+                          >
+                            {s.execution_output}
+                          </Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </Grid>
       </Grid>
     </Container>
