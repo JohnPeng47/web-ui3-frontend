@@ -2,9 +2,11 @@
 
 export type AgentType = "discovery" | "exploit";
 
+export type AgentStatus = "pending_auto" | "pending_approval" | "running" | "completed" | "cancelled";
+
 export interface AgentOut {
   id: string;
-  agent_status: string;
+  agent_status: AgentStatus;
   agent_type: AgentType;
   agent_name: string;
 }

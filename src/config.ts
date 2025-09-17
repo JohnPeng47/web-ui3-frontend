@@ -4,6 +4,7 @@ export type RuntimeConfig = {
   apiProtocol?: string;
   apiHost?: string;
   apiPort?: string | number;
+  MOCK_DATA?: boolean;
 };
 
 let runtimeConfig: RuntimeConfig | undefined;
@@ -49,5 +50,9 @@ export function getApiBaseUrl(): string {
   const host = runtimeConfig?.apiHost || getDefaultHost();
   const port = runtimeConfig?.apiPort !== undefined ? String(runtimeConfig.apiPort) : getDefaultPort();
   return `${protocol}://${host}${port ? `:${port}` : ''}`;
+}
+
+export function isMockDataEnabled(): boolean {
+  return Boolean(runtimeConfig?.MOCK_DATA);
 }
 

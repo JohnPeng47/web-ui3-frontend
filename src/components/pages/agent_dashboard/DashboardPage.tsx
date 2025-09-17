@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * DashboardPage - Pentest Agent Dashboard
+ * 
+ * This component supports both live API mode and mock data mode.
+ * Mock data mode is enabled when MOCK_DATA: true is set in config.json
+ * 
+ * To run in mock mode:
+ * 1. Run `npm run test:mock` to start with mock data
+ * 2. Or manually copy public/test_config.json to public/config.json
+ * 
+ * Mock mode demonstrates dynamic agent discovery and step progression
+ * with realistic penetration testing scenarios.
+ */
+
 import { Box, Card, CardContent, CardHeader, Container, Typography, Grid, Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HeaderBar from "../../common/HeaderBar";
