@@ -27,6 +27,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "live-dev": "HOST=147.79.78.153 PORT=8081 react-scripts start",
     "build": "react-scripts build && node scripts/copy-config.js",
     "build:webpack": "react-scripts build",
     "test": "react-scripts test",
