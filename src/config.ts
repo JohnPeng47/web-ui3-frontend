@@ -15,6 +15,7 @@ export async function loadRuntimeConfig(): Promise<void> {
     const res = await fetch('/config.json', { cache: 'no-store' as const });
     if (!res.ok) throw new Error(`Failed to load config.json (${res.status})`);
     const json = (await res.json()) as RuntimeConfig;
+    console.log('runtimeConfig:', json);
     runtimeConfig = json;
   } catch (error) {
     // As a fallback, use window location to build API base URL

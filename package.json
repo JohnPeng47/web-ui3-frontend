@@ -27,8 +27,8 @@
     "zustand": "^4.5.7"
   },
   "scripts": {
-    "start": "cp configs/normal.json public/config.json && react-scripts start",
-    "dev": "cp configs/mock.json public/config.json && react-scripts start",
+    "start": "cp configs/normal.json build/config.json && react-scripts start",
+    "dev": "cp configs/mock.json build/config.json && react-scripts start",
     "build": "react-scripts build && node scripts/copy-config.js",
     "build:webpack": "react-scripts build",
     "test": "react-scripts test",
