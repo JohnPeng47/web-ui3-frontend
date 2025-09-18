@@ -1,5 +1,5 @@
 import type { DashboardData } from "../components/pages/agent_dashboard/types";
-import { getApiBaseUrl } from "../config";
+import { getApiBaseUrl, isMockDataEnabled } from "../config";
 import type { HealthResponse } from "../api/system/types";
 
 export function getDemoData(): DashboardData {
@@ -90,6 +90,9 @@ export async function getDashboardData(signal: AbortSignal): Promise<DashboardDa
 }
 
 export async function initApi(signal?: AbortSignal): Promise<void> {
+  if (isMockDataEnabled()) {
+    return;
+  }
   const res = await fetch(`${getApiBaseUrl()}/health`, { signal, credentials: "include" });
   if (!res.ok) {
     throw new Error(`Health check failed (${res.status})`);

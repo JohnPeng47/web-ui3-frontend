@@ -2,11 +2,17 @@
 
 export type AgentType = "discovery" | "exploit";
 
+export type AgentStatus = "pending_auto" | "pending_approval" | "running" | "eta" | "completed" | "cancelled";
+
 export interface AgentOut {
   id: string;
-  agent_status: string;
+  agent_status: AgentStatus;
   agent_type: AgentType;
   agent_name: string;
+  // Optional exploit-related metadata for UI/approval flows
+  vulnerability_title?: string;
+  page_url?: string;
+  max_steps?: number;
 }
 
 export interface AgentMessage {
@@ -34,6 +40,7 @@ export interface ExploitAgentCreate {
   log_filepath?: string | null;
   agent_status?: string | null; // defaults server-side to "active"
   agent_type?: AgentType; // defaults server-side to AgentType.EXPLOIT
+  page_url?: string | null;
 }
 
 export interface ExploitAgentStep extends AgentStep {

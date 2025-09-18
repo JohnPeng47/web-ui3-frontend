@@ -2,5 +2,5 @@
     "apiProtocol": "http",
     "apiHost": "localhost",
     "apiPort": 8000,
-    "MOCK_DATA": true
+    "MOCK_DATA": false
 }

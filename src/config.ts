@@ -4,6 +4,7 @@ export type RuntimeConfig = {
   apiProtocol?: string;
   apiHost?: string;
   apiPort?: string | number;
+  MOCK_DATA?: boolean;
 };
 
 let runtimeConfig: RuntimeConfig | undefined;
@@ -14,6 +15,7 @@ export async function loadRuntimeConfig(): Promise<void> {
     const res = await fetch('/config.json', { cache: 'no-store' as const });
     if (!res.ok) throw new Error(`Failed to load config.json (${res.status})`);
     const json = (await res.json()) as RuntimeConfig;
+    console.log('runtimeConfig:', json);
     runtimeConfig = json;
   } catch (error) {
     // As a fallback, use window location to build API base URL
@@ -49,5 +51,9 @@ export function getApiBaseUrl(): string {
   const host = runtimeConfig?.apiHost || getDefaultHost();
   const port = runtimeConfig?.apiPort !== undefined ? String(runtimeConfig.apiPort) : getDefaultPort();
   return `${protocol}://${host}${port ? `:${port}` : ''}`;
+}
+
+export function isMockDataEnabled(): boolean {
+  return Boolean(runtimeConfig?.MOCK_DATA);
 }
 

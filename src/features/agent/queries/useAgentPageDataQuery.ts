@@ -4,6 +4,9 @@ import type { PageDataResponse } from "../../../api/agent/types";
 import { http } from "../../../api/http";
 import type { SpiderStats } from "../../../components/pages/agent_dashboard/types";
 import { PageObservations } from "../models/PageObservations";
+import { useConditionalQuery } from "../../mock/useMockQuery";
+import { agentPageDataMockConfig } from "../../mock/mockPageData";
+import { isMockDataEnabled } from "../../../config";
 
 export interface DerivedAgentPageData {
   siteTreeLines: string[];
@@ -19,8 +22,12 @@ const timelineByEngagement = new Map<string, PageObservations[]>();
 export function useAgentPageDataQuery(engagementId?: string, options?: { intervalMs?: number }) {
   const intervalMs = options?.intervalMs ?? 5_000;
 
-  return useQuery({
-    enabled: Boolean(engagementId),
+  // Check if mock mode is enabled
+  const mockEnabled = isMockDataEnabled();
+
+  // Real query implementation - only run when NOT in mock mode
+  const realQuery = useQuery({
+    enabled: Boolean(engagementId) && !mockEnabled,
     queryKey: engagementId ? agentKeys.pageData(engagementId) : agentKeys.all,
     queryFn: async ({ signal }) => {
       return http.getAgentPageData(engagementId as string, signal);
@@ -47,6 +54,17 @@ export function useAgentPageDataQuery(engagementId?: string, options?: { interva
       };
     }
   });
+
+  return useConditionalQuery(
+    `agentPageData-${engagementId}`,
+    () => realQuery,
+    agentPageDataMockConfig,
+    {
+      enabled: Boolean(engagementId),
+      refetchInterval: intervalMs,
+      refetchIntervalInBackground: true
+    }
+  );
 }
 
 

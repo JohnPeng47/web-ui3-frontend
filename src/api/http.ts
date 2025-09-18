@@ -1,4 +1,6 @@
-import { getApiBaseUrl } from "../config";
+import { getApiBaseUrl, isMockDataEnabled } from "../config";
+import type { HTTPApi } from "./httpTypes";
+import { MockHTTPProvider } from "./mockHttp";
 import type {
   EngagementCreate,
   EngagementOut,
@@ -29,7 +31,7 @@ function ensureAuthCookiesFromLocalStorage() {
   }
 }
 
-export class HTTPProvider {
+export class HTTPProvider implements HTTPApi {
   private readonly baseUrl: string;
 
   constructor() {
@@ -128,6 +130,45 @@ export class HTTPProvider {
   }
 }
 
-export const http = new HTTPProvider();
+class SwitchingHTTPProvider implements HTTPApi {
+  private real = new HTTPProvider();
+  private mock = new MockHTTPProvider();
+
+  private get provider(): HTTPApi {
+    return isMockDataEnabled() ? this.mock : this.real;
+  }
+
+  createEngagement(payload: EngagementCreate, signal?: AbortSignal): Promise<EngagementOut> {
+    return this.provider.createEngagement(payload, signal);
+  }
+  getEngagement(engagementId: string, signal?: AbortSignal): Promise<EngagementOut> {
+    return this.provider.getEngagement(engagementId, signal);
+  }
+  mergePageData(
+    engagementId: string,
+    payload: PageDataMergeRequest,
+    signal?: AbortSignal
+  ): Promise<EngagementPageDataOut> {
+    return this.provider.mergePageData(engagementId, payload, signal);
+  }
+  registerDiscoveryAgent(
+    engagementId: string,
+    payload: DiscoveryAgentCreate,
+    signal?: AbortSignal
+  ): Promise<AgentOut> {
+    return this.provider.registerDiscoveryAgent(engagementId, payload, signal);
+  }
+  listEngagementAgents(engagementId: string, signal?: AbortSignal): Promise<AgentOut[]> {
+    return this.provider.listEngagementAgents(engagementId, signal);
+  }
+  getAgentPageData(engagementId: string, signal?: AbortSignal): Promise<PageDataResponse> {
+    return this.provider.getAgentPageData(engagementId, signal);
+  }
+  getAgentSteps(agentId: string, signal?: AbortSignal): Promise<ExploitAgentStep[]> {
+    return this.provider.getAgentSteps(agentId, signal);
+  }
+}
+
+export const http: HTTPApi = new SwitchingHTTPProvider();
 
 
